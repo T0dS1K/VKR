@@ -1,0 +1,243 @@
+﻿<UserControl x:Class="VKRClient.AttendanceTableControl"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
+             xmlns:local="clr-namespace:VKRClient"
+             xmlns:local_c="clr-namespace:VKRClient.Classes"
+             mc:Ignorable="d" 
+             d:DesignHeight="450" d:DesignWidth="800">
+    <UserControl.Resources>
+        <local_c:AttendanceStringConverter x:Key="AttendanceConverter" />
+
+        <Style TargetType="{x:Type TextBlock}">
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+            <Setter Property="Margin" Value="5" />
+        </Style>
+
+        <Style TargetType="{x:Type DataGridCell}">
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
+
+        <Style TargetType="{x:Type DataGridRow}">
+            <Setter Property="Height" Value="50" />
+            <Setter Property="FontSize" Value="16" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Background" Value="#00FFFFFF" />
+        </Style>
+
+        <Style TargetType="{x:Type DataGrid}">
+            <Setter Property="Background" Value="#FFFFFFFF" />
+            <Setter Property="DataGrid.RowHeaderWidth" Value="0" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="DataGrid.GridLinesVisibility" Value="None" />
+            <Setter Property="HorizontalAlignment" Value="Left" />
+            <Setter Property="DataGrid.CanUserAddRows" Value="False" />
+            <Setter Property="DataGrid.CanUserDeleteRows" Value="False" />
+            <Setter Property="DataGrid.CanUserReorderColumns" Value="False" />
+            <Setter Property="DataGrid.CanUserResizeColumns" Value="True" />
+            <Setter Property="DataGrid.CanUserSortColumns" Value="False" />
+            <Setter Property="DataGrid.HeadersVisibility" Value="Column" />
+            <Setter Property="UIElement.SnapsToDevicePixels" Value="True" />
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type DataGrid}">
+                        <Border BorderBrush="#FFA6A6A6" BorderThickness="1,1,1,1" SnapsToDevicePixels="True">
+                            <Grid>
+                                <ScrollViewer Name="PART_ScrollViewer"
+                                                  Focusable="false"
+                                                  HorizontalScrollBarVisibility="Hidden"
+                                                  VerticalScrollBarVisibility="Hidden"
+                                                  CanContentScroll="True" Background="{TemplateBinding Control.Background}">
+                                    <Grid>
+                                        <Grid.RowDefinitions>
+                                            <RowDefinition Height="Auto" />
+                                            <RowDefinition Height="*" />
+                                        </Grid.RowDefinitions>
+
+                                        <DataGridColumnHeadersPresenter Name="PART_ColumnHeadersPresenter"
+                                                                            Grid.Row="0"
+                                                                            SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
+
+                                        <ItemsPresenter Grid.Row="1" SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}" />
+                                    </Grid>
+                                </ScrollViewer>
+                            </Grid>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+        <Style x:Key="CommonColumnHeaderStyle" TargetType="{x:Type DataGridColumnHeader}">
+            <Setter Property="Height" Value="30" />
+            <Setter Property="BorderBrush" Value="#FFA6A6A6" />
+            <Setter Property="BorderThickness" Value="0.0,0.0,1.0,1.0" />
+            <Setter Property="Background" Value="#00FFFFFF" />
+            <Setter Property="FontSize" Value="22" />
+            <Setter Property="FontWeight" Value="Bold" />
+            <Setter Property="HorizontalContentAlignment" Value="Center" />
+            <Setter Property="VerticalContentAlignment" Value="Center" />
+            <Setter Property="UIElement.SnapsToDevicePixels" Value="True" />
+        </Style>
+
+        <Style x:Key="CommonCellStyle" TargetType="{x:Type DataGridCell}">
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="{x:Type DataGridCell}">
+                        <Border BorderBrush="#FFA6A6A6"
+                                    BorderThickness="0.0,0.0,1.0,1.0"
+                                    Background="{TemplateBinding Control.Background}"
+                                    SnapsToDevicePixels="True">
+
+                            <ContentPresenter SnapsToDevicePixels="{TemplateBinding UIElement.SnapsToDevicePixels}"
+                                                  ContentTemplate="{TemplateBinding ContentControl.ContentTemplate}"
+                                                  Content="{TemplateBinding ContentControl.Content}" />
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+
+    </UserControl.Resources>
+
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*" />
+        </Grid.RowDefinitions>
+
+        <DataGrid Name="AttendanceDataGrid"
+                  Grid.Row="0"
+                  AutoGenerateColumns="False"
+                  CanUserResizeColumns="True"
+                  ItemsSource="{Binding AttendanceCollection}">
+
+            <DataGrid.Columns>
+                <DataGridTextColumn Header="ФИО"
+                                    Width="150" 
+                                    HeaderStyle="{StaticResource CommonColumnHeaderStyle}"
+                                    CellStyle="{StaticResource CommonCellStyle}"
+                                    Binding="{Binding FIO}">
+
+                    <DataGridBoundColumn.ElementStyle>
+                        <Style TargetType="{x:Type TextBlock}">
+                            <Setter Property="HorizontalAlignment" Value="Left" />
+                            <Setter Property="VerticalAlignment" Value="Center" />
+                            <Setter Property="Margin" Value="5" />
+                        </Style>
+                    </DataGridBoundColumn.ElementStyle>
+                </DataGridTextColumn>
+
+                <DataGridTemplateColumn Header="ПН"
+                                        Width="108"
+                                        HeaderStyle="{StaticResource CommonColumnHeaderStyle}"
+                                        CellStyle="{StaticResource CommonCellStyle}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ContentControl>
+                                <ContentControl.Content>
+                                    <MultiBinding Converter="{StaticResource AttendanceConverter}">
+                                        <Binding Path="Monday" />
+                                    </MultiBinding>
+                                </ContentControl.Content>
+                            </ContentControl>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Header="ВТ"
+                                        Width="108"
+                                        HeaderStyle="{StaticResource CommonColumnHeaderStyle}"
+                                        CellStyle="{StaticResource CommonCellStyle}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ContentControl>
+                                <ContentControl.Content>
+                                    <MultiBinding Converter="{StaticResource AttendanceConverter}">
+                                        <Binding Path="Tuesday" />
+                                    </MultiBinding>
+                                </ContentControl.Content>
+                            </ContentControl>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Header="СР"
+                                        Width="108"
+                                        HeaderStyle="{StaticResource CommonColumnHeaderStyle}"
+                                        CellStyle="{StaticResource CommonCellStyle}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ContentControl>
+                                <ContentControl.Content>
+                                    <MultiBinding Converter="{StaticResource AttendanceConverter}">
+                                        <Binding Path="Wednesday" />
+                                    </MultiBinding>
+                                </ContentControl.Content>
+                            </ContentControl>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Header="ЧТ"
+                                        Width="108"
+                                        HeaderStyle="{StaticResource CommonColumnHeaderStyle}"
+                                        CellStyle="{StaticResource CommonCellStyle}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ContentControl>
+                                <ContentControl.Content>
+                                    <MultiBinding Converter="{StaticResource AttendanceConverter}">
+                                        <Binding Path="Thursday" />
+                                    </MultiBinding>
+                                </ContentControl.Content>
+                            </ContentControl>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Header="ПТ"
+                                        Width="108"
+                                        HeaderStyle="{StaticResource CommonColumnHeaderStyle}"
+                                        CellStyle="{StaticResource CommonCellStyle}">
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <ContentControl>
+                                <ContentControl.Content>
+                                    <MultiBinding Converter="{StaticResource AttendanceConverter}">
+                                        <Binding Path="Friday" />
+                                    </MultiBinding>
+                                </ContentControl.Content>
+                            </ContentControl>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+
+                <DataGridTemplateColumn Header="СБ"
+                                        Width="108">
+                    <DataGridColumn.HeaderStyle>
+                        <Style BasedOn="{StaticResource CommonColumnHeaderStyle}" TargetType="{x:Type DataGridColumnHeader}">
+                            <Setter Property="BorderThickness" Value="0.0,0.0,0.0,1.0" />
+                        </Style>
+                    </DataGridColumn.HeaderStyle>
+
+                    <DataGridTemplateColumn.CellTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="#FFA6A6A6" BorderThickness="0.0,0.0,0.0,1.0" SnapsToDevicePixels="True">
+                                <ContentControl>
+                                    <ContentControl.Content>
+                                        <MultiBinding Converter="{StaticResource AttendanceConverter}">
+                                            <Binding Path="Saturday" />
+                                        </MultiBinding>
+                                    </ContentControl.Content>
+                                </ContentControl>
+                            </Border>
+                        </DataTemplate>
+                    </DataGridTemplateColumn.CellTemplate>
+                </DataGridTemplateColumn>
+            </DataGrid.Columns>
+        </DataGrid>
+    </Grid>
+</UserControl>
