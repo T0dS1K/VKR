@@ -115,12 +115,19 @@ namespace VKRServer.Controllers
             var TokenDescriptor = new SecurityTokenDescriptor
             {
                 Subject = new ClaimsIdentity(Claims),
-                Expires = JWT ? DateTime.UtcNow.AddMinutes(30) : DateTime.UtcNow.AddDays(7),
+                Expires = JWT ? DateTime.UtcNow.AddMinutes(30) : SetRefreshLifeTime(),
                 SigningCredentials = new SigningCredentials(new SymmetricSecurityKey
                 (Encoding.UTF8.GetBytes(Configuration["JWT:Key"]!)), SecurityAlgorithms.HmacSha256Signature),
             };
 
             return TokenHandler.WriteToken(TokenHandler.CreateToken(TokenDescriptor));
+        }
+        
+        private DateTime SetRefreshLifeTime()
+        {
+            DateTime now = DateTime.UtcNow;
+            DateTime nextMonth = now.AddMonths(1);
+            return new DateTime(nextMonth.Year, nextMonth.Month, 1, 0, 0, 0).AddHours(-C.TimeZone);
         }
 
         private string SecureHash(string JWT)
