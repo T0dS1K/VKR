@@ -1,0 +1,6 @@
+@VKRServer_HostAddress = http://localhost:5191
+
+GET {{VKRServer_HostAddress}}/weatherforecast/
+Accept: application/json
+
+###
