@@ -27,7 +27,7 @@ namespace VKRServer.Controllers
             N = GetLessonN();
         }
 
-        [HttpPatch("SetMark")]
+        [HttpPost("SetMark")]
         public async Task<ActionResult> SetMark([FromBody] string ScanTempKey)
         {
             if (ScanTempKey != null)
@@ -37,69 +37,75 @@ namespace VKRServer.Controllers
                     int Index = Crypto.Pow(10, N);
                     int ID = int.Parse(User.FindFirst("ID")?.Value!);
                     int Marker = await Context.MarkTable.Where(z => z.ID == ID).Select(z => z.Mark).SingleOrDefaultAsync();
-
-                    if (Marker / Index % 10 == 0)
+    
+                    if (Marker / Index == 0)
                     {
                         var Groop = await Context.UserData.Where(z => z.ID == ID).Select(z => z.Groop).SingleOrDefaultAsync();
-                        var DBTime = await Context.TimeTable.FirstOrDefaultAsync(z => z.Groop == Groop && z.DayOfWeek == GetDayOfWeek() && z.N == N);
-
-                        if (Groop != null && DBTime != null)
+                        var Lessons = await Context.TimeTable.Where(z => z.Groop == Groop && z.DayOfWeek == GetDayOfWeek() && z.N == N).ToListAsync();
+    
+                        if (Groop != null && Lessons != null)
                         {
-                            if (DBTime.StartTime <= Time && Time <= DBTime.EndTime)
+                            foreach (var Lesson in Lessons)
                             {
-                                Marker += Index;
-
-                                if (DBTime.StartTime + C.TimeOfDelay >= Time)
+                                if (Lesson.StartTime <= Time && Time <= Lesson.EndTime)
                                 {
                                     Marker += Index;
-                                }
-
-                                if (TempData.Data.TryGetValue(DBTime.ModerID, out string? TempKey))
-                                {
-                                    if (TempKey == ScanTempKey)
+    
+                                    if (Lesson.StartTime + C.TimeOfDelay >= Time)
                                     {
-                                        await Context.MarkTable.Where(z => z.ID == ID).ExecuteUpdateAsync(z => z.SetProperty(z => z.Mark, Marker));
-                                        return Ok("Успешно");
+                                        Marker += Index;
+                                    }
+    
+                                    if (TempData.Data.TryGetValue(Lesson.ModerID, out string? TempKey))
+                                    {
+                                        if (TempKey == ScanTempKey)
+                                        {
+                                            Console.WriteLine($"{ID} код {Marker}");
+                                            await Context.MarkTable.Where(z => z.ID == ID).ExecuteUpdateAsync(z => z.SetProperty(z => z.Mark, Marker));
+                                            return Ok();
+                                        }
                                     }
                                 }
                             }
-                        }
+                        } 
                     }
                     else
                     {
-                        return Ok("Вы уже отметились");
+                        return NoContent();
                     }
-
                 }
                 catch {}
             }
-
+    
             Console.WriteLine("SetMarkController Error");
-            return BadRequest("Ошибка");
+            return BadRequest();
         }
-
+    
         private int GetLessonN()
         {
-            for (int N = 0; N < C.Schedule.Length - 1; N++)
+            int Length = C.Schedule.Length - 1;
+    
+            for (int N = 0; N < Length; N++)
             {
                 if (Time < C.Schedule[N + 1])
                 {
                     return N;
                 }
             }
-
-            return C.Schedule.Length - 1;
+    
+            return Length;
         }
-
+    
         private int GetDayOfWeek()
         {
-            long Time = (((DateTimeOffset.UtcNow.ToUnixTimeSeconds() + 3600 * C.TimeZone) / 86400) - 4);
-            return (int)((Time % 7 * 2) + (Time / 7 % 2));
+            DateOnly DateOnly = DateOnly.FromDateTime(DateTime.UtcNow.AddHours(C.TimeZone));
+            int DaysPass = DateOnly.DayNumber - new DateOnly(2024, 1, 1).DayNumber;
+            return (DaysPass % 7 * 2) + (DaysPass / 7 % 2);
         }
-
+    
         private int GetTimeNow()
         {
-            return (int)(DateTimeOffset.UtcNow.ToUnixTimeSeconds() / 60 + 60 * C.TimeZone) % 1440;
+            return (int)TimeOnly.FromDateTime(DateTime.UtcNow.AddHours(C.TimeZone)).ToTimeSpan().TotalMinutes;
         }
     }
 }
