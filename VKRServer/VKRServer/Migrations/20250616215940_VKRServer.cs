@@ -73,7 +73,7 @@ namespace VKRServer.Migrations
                 columns: table => new
                 {
                     ID = table.Column<int>(type: "integer", nullable: false),
-                    Key = table.Column<BigInteger>(type: "numeric(60,0)", nullable: false),
+                    Key = table.Column<BigInteger>(type: "numeric(80,0)", nullable: false),
                     FirstName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     LastName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: false),
                     MiddleName = table.Column<string>(type: "character varying(50)", maxLength: 50, nullable: true)
