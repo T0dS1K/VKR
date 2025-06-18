@@ -34,7 +34,7 @@ namespace VKRClient
                 if (Access != null)
                 {
                     App.Client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", Access);
-                    var Response = await App.Client.GetAsync("AuthN/Сheck");
+                    var Response = await App.Client.GetAsync("AuthN/Check");
 
                     if (Response.IsSuccessStatusCode)
                     {
