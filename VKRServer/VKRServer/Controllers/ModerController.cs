@@ -35,7 +35,7 @@ namespace VKRServer.Controllers
 
                     BigInteger A = BigInteger.Parse(PDH.A);
                     BigInteger p = BigInteger.Parse(PDH.p);
-                    BigInteger b = Crypto.GenNum(256);
+                    BigInteger b = Crypto.GenNum(32);
                     BigInteger B = Crypto.PowWithMod(7, b, p);
                     BigInteger K = Crypto.PowWithMod(A, b, p);
 
