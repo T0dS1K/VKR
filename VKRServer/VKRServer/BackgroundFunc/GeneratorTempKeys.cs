@@ -34,26 +34,23 @@ namespace VKRServer.BackgroundFunc
 
         private void GenerateTempKeys(object state)
         {
-            if (!SecretData.Any()) return;
-
-            var NewTempData = new ConcurrentDictionary<int, string>();
-            UnixTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
-            
-            Parallel.ForEach(SecretData, Data =>
+            if (SecretData.Any())
             {
-                if (Data.Key != 0)
+                var NewTempData = new ConcurrentDictionary<int, string>();
+                UnixTime = DateTimeOffset.UtcNow.ToUnixTimeMilliseconds();
+            
+                Parallel.ForEach(SecretData, Data =>
                 {
                     NewTempData[Data.ID] = GetTempKey(Data.Key);
                     Console.WriteLine($"{Data.ID}\t{NewTempData[Data.ID]}\t{UnixTime}");
+                });
+            
+                Console.WriteLine();
+            
+                lock (LockUpdate)
+                {
+                    TempData.Data = NewTempData.ToImmutableDictionary();
                 }
-            });
-
-            Console.WriteLine();
-
-            lock (LockUpdate)
-            {
-                
-                TempData.Data = NewTempData.ToImmutableDictionary();
             }
 
             Timer?.Change(TimeSpan.FromMilliseconds((TimeOut + Error) - (DateTimeOffset.UtcNow.ToUnixTimeMilliseconds() % TimeOut)), Timeout.InfiniteTimeSpan);
@@ -114,7 +111,10 @@ namespace VKRServer.BackgroundFunc
 
                 foreach (var Data in SecretKeys)
                 {
-                    SecretData.Add(Data);
+                    if (Data.Key != 0)
+                    {
+                        SecretData.Add(Data);
+                    }
                 }
             }
             catch
