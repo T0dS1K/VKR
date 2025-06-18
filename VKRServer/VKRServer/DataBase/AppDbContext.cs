@@ -59,7 +59,7 @@ namespace VKRServer.DataBase
                 entity.ToTable("ModerData");
 
                 entity.Property(z => z.Key)
-                      .HasColumnType("numeric(60, 0)");
+                      .HasColumnType("numeric(80, 0)");
 
                 entity.HasOne(z => z.User)
                       .WithOne(z => z.ModerData)
