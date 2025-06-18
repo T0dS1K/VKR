@@ -83,7 +83,7 @@ namespace VKRServer.Migrations
                         .HasColumnType("character varying(50)");
 
                     b.Property<BigInteger>("Key")
-                        .HasColumnType("numeric(60, 0)");
+                        .HasColumnType("numeric(80, 0)");
 
                     b.Property<string>("LastName")
                         .IsRequired()
