@@ -30,7 +30,7 @@ namespace VKRServer.Controllers
         }
 
         [Authorize(Policy = "Access")]
-        [HttpGet("Сheck")]
+        [HttpGet("Check")]
         public IActionResult GetResource()
         {
             return Ok();
