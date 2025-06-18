@@ -1,0 +1,60 @@
+<?xml version="1.0" encoding="utf-8"?>
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:tools="http://schemas.android.com/tools"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:gravity="center"
+    android:orientation="vertical">
+
+    <LinearLayout
+        style="@style/LinearLayoutStyle"
+        android:background="@drawable/border_gray">
+
+        <TextView
+            style="@style/TextStyle"
+            android:text="@string/u1"
+            android:textSize="20sp"/>
+
+        <ImageView
+            android:layout_width="200dp"
+            android:layout_height="200dp"
+            android:src="@drawable/logo"
+            tools:ignore="ContentDescription"/>
+
+        <TextView
+            style="@style/TextStyle"
+            android:text="@string/u2"
+            android:textSize="25sp"/>
+
+    </LinearLayout>
+
+    <LinearLayout
+        style="@style/LinearLayoutStyle"
+        android:background="@drawable/border"
+        android:layout_marginTop="-1dp">
+
+        <EditText
+            style="@style/EditBoxStyle"
+            android:id="@+id/LoginBox"
+            android:layout_marginTop="50dp"
+            android:autofillHints=""
+            android:hint="@string/Login"
+            android:inputType="text"/>
+
+        <EditText
+            style="@style/EditBoxStyle"
+            android:id="@+id/PasswordBox"
+            android:layout_marginTop="15dp"
+            android:autofillHints=""
+            android:hint="@string/Pass"
+            android:inputType="textPassword"/>
+
+        <Button
+            style="@style/ButtonStyle"
+            android:id="@+id/SingIn"
+            android:layout_marginTop="15dp"
+            android:layout_marginBottom="50dp"
+            android:text="@string/SignIn" />
+
+    </LinearLayout>
+</LinearLayout>
