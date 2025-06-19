@@ -22,7 +22,7 @@ import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
 
-public class AuthNActivity extends AppCompatActivity
+ublic class AuthNActivity extends AppCompatActivity
 {
     private ApiService ApiService;
     private JWTManager JWTManager;
@@ -61,9 +61,7 @@ public class AuthNActivity extends AppCompatActivity
             {
                 if (Response.isSuccessful() && Response.body() != null)
                 {
-                    JWTManager.SaveTokens(Response.body());
-                    JWTManager.SetBearer();
-
+                    TokenData TokenData = Response.body();
                     String Role = GetRole(Response.body().jwtAccess);
                     SharedPreferences Prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE);
                     Prefs.edit().putString("Role", Role).apply();
@@ -78,7 +76,7 @@ public class AuthNActivity extends AppCompatActivity
                         BigInteger p = Crypto.GenNum(32);
                         BigInteger A = Crypto.PowWithMod(BigInteger.valueOf(7), a, p);
 
-                        Call<String> SetKeyCall = ApiService.SetKey(App.GetBearer(), new PDH(A.toString(), p.toString()));
+                        Call<String> SetKeyCall = ApiService.SetKey("Bearer " + TokenData.jwtAccess, new PDH(A.toString(), p.toString()));
                         SetKeyCall.enqueue(new Callback<String>()
                         {
                             @Override
@@ -86,6 +84,7 @@ public class AuthNActivity extends AppCompatActivity
                             {
                                 if (Response.isSuccessful() && Response.body() != null)
                                 {
+                                    JWTManager.SaveTokens(TokenData);
                                     JWTManager.SaveSecretKey(Crypto.PowWithMod(new BigInteger(Response.body()), a, p).toString());
                                     StartMainActivity();
                                 }
@@ -110,17 +109,16 @@ public class AuthNActivity extends AppCompatActivity
         });
     }
 
+    private void StartMainActivity()
+    {
+        startActivity(new Intent(this, MainActivity.class));
+        finish();
+    }
+
     private String GetRole(String Token)
     {
         String[] parts = Token.split("\\.");
         String payloadJson = new String(Base64.getUrlDecoder().decode(parts[1]), StandardCharsets.UTF_8);
         return payloadJson.split("\"Role\":\"")[1].split("\"")[0];
-    }
-
-    private void StartMainActivity()
-    {
-        Intent intent = new Intent(this, MainActivity.class);
-        startActivity(intent);
-        finish();
     }
 }
