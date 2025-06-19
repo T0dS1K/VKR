@@ -1,9 +1,6 @@
 package com.example.vkr.ui.API;
 
 import android.app.Application;
-
-import java.math.BigInteger;
-
 import retrofit2.Retrofit;
 import retrofit2.converter.gson.GsonConverterFactory;
 
@@ -49,7 +46,7 @@ public class App extends Application
 
     public static void SetBearer(String Token)
     {
-        Bearer = "Bearer " + Token;
+        App.Bearer = Bearer;
     }
 
     public static String GetBearer()
