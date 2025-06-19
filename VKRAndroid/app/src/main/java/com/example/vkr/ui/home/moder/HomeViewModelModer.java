@@ -1,8 +1,6 @@
 package com.example.vkr.ui.home.moder;
 
 import javax.crypto.Mac;
-
-import android.content.Context;
 import android.os.Handler;
 import java.nio.ByteOrder;
 import java.nio.ByteBuffer;
@@ -10,13 +8,10 @@ import java.math.BigInteger;
 import java.util.Collections;
 import android.graphics.Color;
 import android.graphics.Bitmap;
-
+import android.os.Looper;
 import androidx.lifecycle.LiveData;
 import androidx.lifecycle.ViewModel;
-
-import com.example.vkr.MainActivity;
 import com.example.vkr.ui.API.App;
-import com.example.vkr.ui.API.JWTManager;
 import com.google.zxing.BarcodeFormat;
 import com.google.zxing.EncodeHintType;
 import javax.crypto.spec.SecretKeySpec;
@@ -29,15 +24,14 @@ import java.security.NoSuchAlgorithmException;
 public class HomeViewModelModer extends ViewModel
 {
     private static final String Alphabet = "0123456789ABCDEFGHIJKLMNOPQRSTUVWXYZ";
+    private final Handler Handler = new Handler(Looper.getMainLooper());
     private final BigInteger Key = new BigInteger(App.GetSecretKey());
     private final MutableLiveData<Bitmap> QRBitmap;
     private final MutableLiveData<Long> Timer;
-    private final Handler Handler = new Handler();
     private static final int TimeOut = 31000;
     private static final int Delay = 1000;
     private static final int Size = 200;
-    private static final int Error= 10;
-
+    private static final int Error = 10;
 
     public HomeViewModelModer()
     {
@@ -53,7 +47,7 @@ public class HomeViewModelModer extends ViewModel
         public void run()
         {
             QRBitmap.setValue(GenQR());
-            Handler.postDelayed(this, (TimeOut + Error - System.currentTimeMillis() % TimeOut));
+            Handler.postDelayed(this, TimeOut + Error - (System.currentTimeMillis() % TimeOut));
         }
     };
 
@@ -63,16 +57,18 @@ public class HomeViewModelModer extends ViewModel
         public void run()
         {
             Timer.setValue((TimeOut - (System.currentTimeMillis() % TimeOut)) / Delay);
-            Handler.postDelayed(this, (Delay + Error - System.currentTimeMillis() % Delay));
+            long nextExecutionTime = (Delay + Error - (System.currentTimeMillis() % Delay));
+            Handler.postDelayed(this, nextExecutionTime);
         }
     };
 
     private Bitmap GenQR()
     {
-        try {
-
+        try
+        {
+            String code = GenCode();
             BitMatrix bitMatrix = new MultiFormatWriter().encode(
-                    GenCode(),
+                    code,
                     BarcodeFormat.QR_CODE,
                     Size,
                     Size,
@@ -116,11 +112,21 @@ public class HomeViewModelModer extends ViewModel
 
         for (int i = 0; i < 5; i++)
         {
-            HashString.insert(0, Alphabet.charAt(HashInt.mod(BigInteger.valueOf(Alphabet.length())).intValue()));
+            int sym = HashInt.mod(BigInteger.valueOf(Alphabet.length())).intValue();
+            HashString.insert(0, Alphabet.charAt(sym));
+            BigInteger newHashInt = HashInt.divide(BigInteger.valueOf(Alphabet.length()));
 
-            while (Alphabet.charAt(HashInt.mod(BigInteger.valueOf(Alphabet.length())).intValue()) == HashString.charAt(0))
+            while (newHashInt.mod(BigInteger.valueOf(Alphabet.length())).intValue() == sym && !newHashInt.equals(BigInteger.ZERO))
             {
-                HashInt = HashInt.divide(BigInteger.valueOf(Alphabet.length()));
+                HashInt = newHashInt;
+                newHashInt = HashInt.divide(BigInteger.valueOf(Alphabet.length()));
+            }
+            
+            HashInt = newHashInt;
+
+            if (HashInt.equals(BigInteger.ZERO) && i < 4)
+            {
+                break;
             }
         }
 
