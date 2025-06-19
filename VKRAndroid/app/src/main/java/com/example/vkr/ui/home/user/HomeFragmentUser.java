@@ -11,13 +11,9 @@ import androidx.annotation.NonNull;
 import androidx.annotation.Nullable;
 import androidx.fragment.app.Fragment;
 import androidx.lifecycle.ViewModelProvider;
-
 import com.example.vkr.ui.API.App;
 import com.example.vkr.R;
-import com.journeyapps.barcodescanner.BarcodeResult;
 import com.journeyapps.barcodescanner.DecoratedBarcodeView;
-import com.journeyapps.barcodescanner.BarcodeCallback;
-
 import retrofit2.Call;
 import retrofit2.Callback;
 import retrofit2.Response;
@@ -34,13 +30,7 @@ public class HomeFragmentUser extends Fragment
     @Override
     public View onCreateView(@NonNull LayoutInflater inflater, @Nullable ViewGroup container, @Nullable Bundle savedInstanceState)
     {
-        return inflater.inflate(R.layout.fragment_home, container, false);
-    }
-
-    @Override
-    public void onViewCreated(@NonNull View view, @Nullable Bundle savedInstanceState)
-    {
-        super.onViewCreated(view, savedInstanceState);
+        View view = inflater.inflate(R.layout.fragment_home, container, false);
         viewModel = new ViewModelProvider(this).get(HomeViewModelUser.class);
 
         scannerContainer = view.findViewById(R.id.scannerContainer);
@@ -50,6 +40,8 @@ public class HomeFragmentUser extends Fragment
         ScannerQR();
         SetMark();
         ClearButton();
+
+        return view;
     }
 
     private void ScannerQR()
@@ -59,18 +51,11 @@ public class HomeFragmentUser extends Fragment
         barcodeView.getViewFinder().setVisibility(View.GONE);
         scannerContainer.addView(barcodeView);
 
-        barcodeView.decodeContinuous(new BarcodeCallback()
+        barcodeView.decodeContinuous(Code ->
         {
-            @Override
-            public void barcodeResult(BarcodeResult result)
+            if (Code.getText() != null)
             {
-                if (result.getText() != null)
-                {
-                    requireActivity().runOnUiThread(() ->
-                    {
-                        viewModel.HandleScanResult(result.getText());
-                    });
-                }
+                requireActivity().runOnUiThread(() -> viewModel.HandleScanResult(Code.getText()));
             }
         });
     }
@@ -91,7 +76,7 @@ public class HomeFragmentUser extends Fragment
                     SetMarkCall.enqueue(new Callback<Void>()
                     {
                         @Override
-                        public void onResponse(Call<Void> Call, Response<Void> Response)
+                        public void onResponse(@NonNull Call<Void> Call, @NonNull Response<Void> Response)
                         {
                             if (Response.code() == 200)
                             {
@@ -108,7 +93,7 @@ public class HomeFragmentUser extends Fragment
                         }
 
                         @Override
-                        public void onFailure(Call<Void> Call, Throwable T)
+                        public void onFailure(@NonNull Call<Void> Call, @NonNull Throwable T)
                         {
                             resultTextView.setText("НЕ В СЕТИ");
                         }
