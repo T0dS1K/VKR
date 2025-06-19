@@ -4,6 +4,7 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.content.SharedPreferences;
+import com.example.vkr.ui.API.CallBack;
 import com.example.vkr.ui.API.JWTManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import androidx.appcompat.app.AppCompatActivity;
@@ -26,29 +27,32 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         SharedPreferences SP = getSharedPreferences("AppPrefs", MODE_PRIVATE);
         JWTManager JWTManager = new JWTManager(this);
+        String Role = SP.getString("Role", null);
+
+        binding = ActivityMainBinding.inflate(getLayoutInflater());
+        setContentView(binding.getRoot());
+
+        if ("User".equals(Role))
+        {
+            SetupNavigation(R.navigation.user_navigation);
+            CheckCameraPermission();
+        }
+        else if ("Moder".equals(Role))
+        {
+            JWTManager.SetSecretKey();
+            SetupNavigation(R.navigation.moder_navigation);
+        }
+        else
+        {
+            StartAuthNActivity();
+        }
 
         JWTManager.SetBearer(new CallBack()
         {
             @Override
             public void onSuccess()
             {
-                runOnUiThread(() ->
-                {
-                    String Role = SP.getString("Role", "User");
-                    binding = ActivityMainBinding.inflate(getLayoutInflater());
-                    setContentView(binding.getRoot());
-
-                    if ("User".equals(Role))
-                    {
-                        SetupNavigation(R.navigation.user_navigation);
-                        CheckCameraPermission();
-                    }
-                    else if ("Moder".equals(Role))
-                    {
-                        JWTManager.SetSecretKey();
-                        SetupNavigation(R.navigation.moder_navigation);
-                    }
-                });
+                runOnUiThread(() ->{});
             }
 
             @Override
