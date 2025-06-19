@@ -4,7 +4,6 @@ import android.content.Intent;
 import android.content.pm.PackageManager;
 import android.os.Bundle;
 import android.content.SharedPreferences;
-import com.example.vkr.ui.API.App;
 import com.example.vkr.ui.API.JWTManager;
 import com.google.android.material.bottomnavigation.BottomNavigationView;
 import androidx.appcompat.app.AppCompatActivity;
@@ -27,36 +26,53 @@ public class MainActivity extends AppCompatActivity
         super.onCreate(savedInstanceState);
         SharedPreferences SP = getSharedPreferences("AppPrefs", MODE_PRIVATE);
         JWTManager JWTManager = new JWTManager(this);
-        JWTManager.SetBearer();
 
-        if (App.GetBearer() == null)
+        JWTManager.SetBearer(new CallBack()
         {
-            try
+            @Override
+            public void onSuccess()
             {
-                startActivity(new Intent(this, AuthNActivity.class));
-                finish();
-                return;
+                runOnUiThread(() ->
+                {
+                    String Role = SP.getString("Role", "User");
+                    binding = ActivityMainBinding.inflate(getLayoutInflater());
+                    setContentView(binding.getRoot());
+
+                    if ("User".equals(Role))
+                    {
+                        SetupNavigation(R.navigation.user_navigation);
+                        CheckCameraPermission();
+                    }
+                    else if ("Moder".equals(Role))
+                    {
+                        JWTManager.SetSecretKey();
+                        SetupNavigation(R.navigation.moder_navigation);
+                    }
+                });
             }
-            catch (Exception e)
+
+            @Override
+            public void onFailure()
             {
-                finishAffinity();
+                runOnUiThread(() ->
+                {
+                    try
+                    {
+                        StartAuthNActivity();
+                    }
+                    catch (Exception e)
+                    {
+                        finishAffinity();
+                    }
+                });
             }
-        }
+        });
+    }
 
-        String Role = SP.getString("Role", null);
-        binding = ActivityMainBinding.inflate(getLayoutInflater());
-        setContentView(binding.getRoot());
-
-        if ("User".equals(Role))
-        {
-            SetupNavigation(R.navigation.user_navigation);
-            CheckCameraPermission();
-        }
-        else if ("Moder".equals(Role))
-        {
-            JWTManager.SetSecretKey();
-            SetupNavigation(R.navigation.moder_navigation);
-        }
+    private void StartAuthNActivity()
+    {
+        startActivity(new Intent(MainActivity.this, AuthNActivity.class));
+        finish();
     }
 
     private void CheckCameraPermission()
