@@ -25,7 +25,7 @@ namespace VKRServer.Controllers
         {
             if (Groop != null)
             {
-                var AttendanceSimpled = await Context.UserData.Where(z => z.Groop == Groop).Select(z => new
+                var AttendanceSimpled = await Context.UserData.Where(z => z.Groop == Groop.ToUpper()).Select(z => new
                 {
                     FIO = $"{z.LastName} { z.FirstName![0]}." + (z.MiddleName != null ? $"{ z.MiddleName[0]}." : ""),
                     Attendance = z.MarkTable != null ? z.MarkTable.Attendance : null
@@ -73,7 +73,7 @@ namespace VKRServer.Controllers
                     FirstName = FirstName,
                     LastName = LastName,
                     MiddleName = MiddleName,
-                    Groop = Groop,
+                    Groop = Groop.ToUpper(),
 
                     MarkTable = new MarkTable
                     {
@@ -123,7 +123,7 @@ namespace VKRServer.Controllers
             TimeTable TimeTable = new TimeTable()
             {
                 N = N,
-                Groop = Groop,
+                Groop = Groop.ToUpper(),
                 DayOfWeek = DayOfWeek,
                 ModerID = ModerID,
                 StartTime = StartTime,
