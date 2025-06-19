@@ -53,7 +53,7 @@ public class ConcatenationAttendance : IHostedService, IDisposable
     public Task StartAsync(CancellationToken CancellationToken)
     {
         var Now = DateTimeOffset.Now;
-        var DueTime = now.Date.AddDays(1).AddHours(C.TimeZone) - Now;
+        var DueTime = now.Date.AddDays(1).AddHours(-C.TimeZone) - Now;
         Timer = new Timer(ConcatenationProcess!, DueTime, TimeSpan.Zero, TimeSpan.FromHours(24));
         return Task.CompletedTask;
     }
