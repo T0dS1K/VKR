@@ -61,7 +61,7 @@ ublic class AuthNActivity extends AppCompatActivity
             {
                 if (Response.isSuccessful() && Response.body() != null)
                 {
-                    TokenData TokenData = Response.body();
+                    JWTManager.SaveTokens(Response.body());
                     String Role = GetRole(Response.body().jwtAccess);
                     SharedPreferences Prefs = getSharedPreferences("AppPrefs", MODE_PRIVATE);
                     Prefs.edit().putString("Role", Role).apply();
@@ -76,7 +76,7 @@ ublic class AuthNActivity extends AppCompatActivity
                         BigInteger p = Crypto.GenNum(32);
                         BigInteger A = Crypto.PowWithMod(BigInteger.valueOf(7), a, p);
 
-                        Call<String> SetKeyCall = ApiService.SetKey("Bearer " + TokenData.jwtAccess, new PDH(A.toString(), p.toString()));
+                        Call<String> SetKeyCall = ApiService.SetKey("Bearer " + Response.body().jwtAccess, new PDH(A.toString(), p.toString()));
                         SetKeyCall.enqueue(new Callback<String>()
                         {
                             @Override
@@ -84,7 +84,6 @@ ublic class AuthNActivity extends AppCompatActivity
                             {
                                 if (Response.isSuccessful() && Response.body() != null)
                                 {
-                                    JWTManager.SaveTokens(TokenData);
                                     JWTManager.SaveSecretKey(Crypto.PowWithMod(new BigInteger(Response.body()), a, p).toString());
                                     StartMainActivity();
                                 }
