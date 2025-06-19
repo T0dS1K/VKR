@@ -15,6 +15,7 @@ builder.Services.AddAuthorization();
 builder.Services.AddEndpointsApiExplorer();
 builder.Services.AddSingleton<TempDataCon>();
 builder.Services.AddSingleton<ITempKeyGenerator, GeneratorTempKeys>();
+builder.Services.AddSingleton<IHostedService, ConcatenationAttendance>();
 builder.Services.AddSingleton(provider =>(IHostedService)provider.GetRequiredService<ITempKeyGenerator>());
 builder.Services.AddDbContext<AppDbContext>(options => options.UseNpgsql(builder.Configuration.GetConnectionString("Database")));
 builder.Services.AddAuthentication(options =>
