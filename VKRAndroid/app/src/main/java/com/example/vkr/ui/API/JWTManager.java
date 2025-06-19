@@ -68,6 +68,7 @@ public class JWTManager
                 {
                     if (Response.code() == 401)
                     {
+                        App.SetBearer(null);
                         JWTUpdate();
                     }
                 }
@@ -75,7 +76,6 @@ public class JWTManager
                 @Override
                 public void onFailure(@NonNull Call<Void> Call, @NonNull Throwable T) {}
             });
-
         }
     }
 
