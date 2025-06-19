@@ -51,65 +51,99 @@ public class JWTManager
         }
     }
 
-    public void SetBearer()
+   public void SetBearer(CallBack CallBack)
     {
-        String Access = GetJWT("jwtAccess");
+        String Access = GetJWT(JWT_ACCESS);
 
-        if (Access != null)
+        if (Access == null)
         {
-            App.SetBearer(Access);
-            com.example.vkr.ui.API.ApiService ApiService = App.GetApiService();
-            Call<Void> CheckCall = ApiService.Check(App.GetBearer());
-
-            CheckCall.enqueue(new Callback<Void>()
-            {
-                @Override
-                public void onResponse(@NonNull Call<Void> Call, @NonNull Response<Void> Response)
-                {
-                    if (Response.code() == 401)
-                    {
-                        App.SetBearer(null);
-                        JWTUpdate();
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<Void> Call, @NonNull Throwable T) {}
-            });
+            CallBack.onFailure();
+            return;
         }
+
+        String Bearer = "Bearer " + Access;
+        com.example.vkr.ui.API.ApiService ApiService = App.GetApiService();
+        Call<Void> CheckCall = ApiService.Check(Bearer);
+
+        CheckCall.enqueue(new Callback<Void>()
+        {
+            @Override
+            public void onResponse(@NonNull Call<Void> Call, @NonNull Response<Void> Response)
+            {
+                if (Response.code() == 200)
+                {
+                    App.SetBearer(Bearer);
+                    CallBack.onSuccess();
+                }
+                else if (Response.code() == 401)
+                {
+                    JWTUpdate(new CallBack()
+                    {
+                        @Override
+                        public void onSuccess()
+                        {
+                            SetBearer(CallBack);
+                        }
+
+                        @Override
+                        public void onFailure()
+                        {
+                            CallBack.onFailure();
+                        }
+                    });
+                }
+                else
+                {
+                    CallBack.onFailure();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<Void> Call, @NonNull Throwable T)
+            {
+                CallBack.onSuccess();;
+            }
+        });
     }
 
-    private void JWTUpdate()
+    private void JWTUpdate(CallBack CallBack)
     {
-        String Refresh = GetJWT("jwtRefresh");
+        String Refresh = GetJWT(JWT_REFRESH);
 
-        if (Refresh != null)
+        if (Refresh == null)
         {
-            com.example.vkr.ui.API.ApiService ApiService = App.GetApiService();
-            Call<TokenData> JWTUpdateCall = ApiService.JWTUpdate(Refresh);
-
-            JWTUpdateCall.enqueue(new Callback<TokenData>()
-            {
-                @Override
-                public void onResponse(@NonNull Call<TokenData> Call, @NonNull Response<TokenData> Response)
-                {
-                    if (Response.isSuccessful())
-                    {
-                        SaveTokens(Response.body());
-                        SetBearer();
-                    }
-                    else
-                    {
-                        ESP.edit().clear().apply();
-                    }
-                }
-
-                @Override
-                public void onFailure(@NonNull Call<TokenData> Call, @NonNull Throwable T) {}
-            });
+            CallBack.onFailure();
+            return;
         }
-    }
 
+        com.example.vkr.ui.API.ApiService ApiService = App.GetApiService();
+        Call<TokenData> JWTUpdateCall = ApiService.JWTUpdate(Refresh);
+
+        JWTUpdateCall.enqueue(new Callback<TokenData>()
+        {
+            @Override
+            public void onResponse(@NonNull Call<TokenData> Call, @NonNull Response<TokenData> Response)
+            {
+                if (Response.isSuccessful())
+                {
+                    SaveTokens(Response.body());
+                    CallBack.onSuccess();
+                }
+                else
+                {
+                    ESP.edit().clear().apply();
+                    CallBack.onFailure();
+                }
+            }
+
+            @Override
+            public void onFailure(@NonNull Call<TokenData> Call, @NonNull Throwable T)
+            {
+                CallBack.onFailure();
+            }
+        });
+    }
+    
     public String GetJWT(String Type)
     {
         if (ESP != null)
